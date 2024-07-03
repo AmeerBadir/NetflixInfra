@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: netflix-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: netflix-frontend
+  template:
+    metadata:
+      labels:
+        app: netflix-frontend
+    spec:
+      containers:
+        - name: netflix-frontend
+          image: ghalebb/netflix_front:0.0.3
+          ports:
+            - containerPort: 3000
+          env:
+            - name: MOVIE_CATALOG_SERVICE
+              value: "http://netflix-movie-catalog-service:8080" # This is the DNS name of the service
+#            - name: REDIS_URL
+#              value: "redis:6379"
+          livenessProbe:
+            httpGet:
+              path: '/'   # Replace with actual path for health check endpoint
+              port: 3000       # Port on which your application listens
+            initialDelaySeconds: 15  # Wait 15 seconds before first probe
+            periodSeconds: 10         # Check every 10 seconds
+            timeoutSeconds: 10
+
+          readinessProbe:
+            httpGet:
+              path: '/'     # Replace with actual path for readiness check endpoint
+              port: 3000       # Port on which your application listens
+            initialDelaySeconds: 20  # Wait 20 seconds before first probe
+            periodSeconds: 15         # Check every 15 seconds
+            timeoutSeconds: 10
